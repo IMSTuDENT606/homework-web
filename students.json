@@ -1,0 +1,12 @@
+[
+  {
+    "username": "MJ",
+    "password": "scrypt:32768:8:1$YNLfg3q4kJrKW9ax$25d597a99cffa970bc9770acb6c14e1bec01da6f148a80324d20d1cedec432a01db0df13cd4d602c40c94acf099ccc1cc8f1d6149cda2c49c7e77dca50c49e98",
+    "role": "teacher"
+  },
+  {
+    "username": "IMMJ",
+    "password": "scrypt:32768:8:1$9RhiKtt87PtiTVuV$0866bdbe3698a3b732f38785d914a38bc132f145e0171e8498d2061ff1547d87d7d64e2a34388f7c19b00c2b05b4e46fee8ada0d3ea12773d13d2fb23b333dea",
+    "role": "student"
+  }
+]

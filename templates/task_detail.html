@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>รายละเอียดงาน</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-4">
+
+    <a href="/teacher" class="btn btn-secondary btn-sm mb-3">⬅ กลับ</a>
+
+    <div class="card">
+
+        <div class="card-header bg-dark text-white">
+            📄 {{ task.subject }} – {{ task.title }}
+        </div>
+
+        <div class="card-body">
+
+            <p>⏰ กำหนดส่ง: {{ task.deadline }}</p>
+
+            <hr>
+
+            <!-- ================== ส่งตรงเวลา ================== -->
+
+            <h5 class="text-success">✅ ส่งตรงเวลา ({{ submitted|length }})</h5>
+
+            <ul>
+
+            {% for s in submitted %}
+            <li>
+
+                <b>{{ s.name }}</b>
+
+                {% if s.status == "checked" %}
+                    <span class="badge bg-success ms-1">ตรวจแล้ว</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark ms-1">รอตรวจ</span>
+                {% endif %}
+
+                {% if s.score != None %}
+                    <br>คะแนน: {{ s.score }}
+                    <br>ครูว่า: {{ s.comment }}
+                {% endif %}
+
+                {% if task.files is defined and s.name in task.files %}
+                    <a href="{{ url_for(
+                        'download_file',
+                        task_id=task.id,
+                        filename=task.files[s.name]
+                    ) }}"
+                    class="btn btn-sm btn-outline-primary ms-2">
+                        📥 ดาวน์โหลด
+                    </a>
+                {% else %}
+                    <span class="text-muted ms-2">(ไม่มีไฟล์)</span>
+                {% endif %}
+
+                <form
+                    action="{{ url_for('grade', task_id=task.id, student=s.name) }}"
+                    method="POST"
+                    class="mt-2">
+
+                    <input type="number" name="score" min="0" max="100" required>
+                    <input type="text" name="comment" placeholder="ความคิดเห็น">
+
+                    <button type="submit"
+                        class="btn btn-sm btn-success">
+                        บันทึกคะแนน
+                    </button>
+
+                </form>
+
+            </li>
+            {% else %}
+                <li class="text-muted">ไม่มี</li>
+            {% endfor %}
+
+            </ul>
+
+            <hr>
+
+
+            <!-- ================== ส่งช้า ================== -->
+
+            <h5 class="text-warning">⏰ ส่งช้า ({{ late|length }})</h5>
+
+            <ul>
+
+            {% for s in late %}
+            <li>
+
+                <b>{{ s.name }}</b>
+
+                {% if s.status == "checked" %}
+                    <span class="badge bg-success ms-1">ตรวจแล้ว</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark ms-1">รอตรวจ</span>
+                {% endif %}
+
+                <span class="badge bg-danger ms-1">ส่งช้า</span>
+
+                {% if s.score != None %}
+                    <br>คะแนน: {{ s.score }}
+                    <br>ครูว่า: {{ s.comment }}
+                {% endif %}
+
+                {% if task.files is defined and s.name in task.files %}
+                    <a href="{{ url_for(
+                        'download_file',
+                        task_id=task.id,
+                        filename=task.files[s.name]
+                    ) }}"
+                    class="btn btn-sm btn-outline-primary ms-2">
+                        📥 ดาวน์โหลด
+                    </a>
+                {% else %}
+                    <span class="text-muted ms-2">(ไม่มีไฟล์)</span>
+                {% endif %}
+
+                <form
+                    action="{{ url_for('grade', task_id=task.id, student=s.name) }}"
+                    method="POST"
+                    class="mt-2">
+
+                    <input type="number" name="score" min="0" max="100" required>
+                    <input type="text" name="comment" placeholder="ความคิดเห็น">
+
+                    <button type="submit"
+                        class="btn btn-sm btn-success">
+                        บันทึกคะแนน
+                    </button>
+
+                </form>
+
+            </li>
+
+            {% else %}
+                <li class="text-muted">ไม่มี</li>
+            {% endfor %}
+
+            </ul>
+
+            <hr>
+
+
+            <!-- ================== ยังไม่ส่ง ================== -->
+
+            <h5 class="text-danger">❌ ยังไม่ส่ง ({{ not_submitted|length }})</h5>
+
+            {% if not_submitted|length > 0 %}
+
+            <ul>
+                {% for s in not_submitted %}
+                    <li>{{ s }}</li>
+                {% endfor %}
+            </ul>
+
+            {% else %}
+                <p class="text-success">ทุกคนส่งครบแล้ว 🎉</p>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<!-- Navbar -->
+<nav class="navbar navbar-light bg-white shadow-sm px-4">
+    <span class="navbar-brand">
+        🎓 {{ username }} (นักเรียน)
+    </span>
+    <a href="/logout" class="btn btn-outline-danger btn-sm">
+        🚪 Logout
+    </a>
+</nav>
+
+<div class="container mt-4">
+    <h4 class="mb-3">📚 งานที่ได้รับมอบหมาย</h4>
+
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6>📄 งานทั้งหมด</h6>
+                    <h3>{{ total }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm text-success">
+                <div class="card-body">
+                    <h6>✅ ตรวจแล้ว</h6>
+                    <h3>{{ checked }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm text-warning">
+                <div class="card-body">
+                    <h6>⏳ รอตรวจ</h6>
+                    <h3>{{ pending }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm text-primary">
+                <div class="card-body">
+                    <h6>📊 คะแนนเฉลี่ย</h6>
+                    <h3>{{ avg }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% if tasks|length == 0 %}
+        <div class="alert alert-info">
+            ยังไม่มีงานที่ได้รับมอบหมาย
+        </div>
+    {% else %}
+        {% for t in tasks %}
+        <div class="card mb-3
+
+        {% if t.alert == 'near_deadline' %}
+        border-warning
+
+        {% elif t.alert == 'overdue' %}
+        border-danger
+
+        {% elif t.alert == 'checked' %}
+        border-success
+
+        {% elif t.alert == 'excellent' %}
+        border-primary
+        {% endif %}
+
+        ">
+        
+            <div class="card-body">
+                <h5 class="card-title">
+                {% if t.alert == "near_deadline" %}
+                <div class="alert alert-warning py-1">
+                ⚠️ ใกล้หมดเวลาแล้ว รีบส่งนะ!
+                </div>
+
+                {% elif t.alert == "overdue" %}
+                <div class="alert alert-danger py-1">
+                ❌ หมดเวลาแล้ว (ส่งช้า)
+                </div>
+
+                {% elif t.alert == "checked" %}
+                <div class="alert alert-success py-1">
+                ✅ ครูตรวจแล้ว
+                </div>
+
+                {% elif t.alert == "excellent" %}
+                <div class="alert alert-primary py-1">
+                🏆 คะแนนดีมาก เยี่ยมเลย!
+                </div>
+                {% endif %}
+                
+                    {{ t.subject }} – {{ t.title }}
+                </h5>
+
+                <p class="card-text mb-1">
+                    🕒 กำหนดส่ง: {{ t.deadline }}
+                </p>
+
+                <p class="card-text text-muted">
+                    ⏳ เหลือเวลา:
+                    <span class="countdown"
+                            data-seconds="{{ t.seconds_left }}">
+                        กำลังนับถอยหลัง...
+                    </span>
+                <p>
+    <p>
+📌 สถานะ:
+
+{% if t.view_status == "pending" %}
+    <span class="badge bg-warning text-dark">ยังไม่ส่ง</span>
+
+{% elif t.view_status == "late" %}
+    <span class="badge bg-danger">หมดเวลา (ยังไม่ส่ง)</span>
+
+{% elif t.view_status == "submitted" or t.view_status == "submitted_late" %}
+
+    {% if t.view_status == "submitted_late" %}
+        <span class="badge bg-danger">ส่งแล้ว (ช้า)</span>
+    {% else %}
+        <span class="badge bg-success">ส่งแล้ว</span>
+    {% endif %}
+
+    {% if t.check_status == "checked" %}
+        <span class="badge bg-success ms-1">✅ ตรวจแล้ว</span>
+    {% else %}
+        <span class="badge bg-warning text-dark ms-1">⏳ รอตรวจ</span>
+    {% endif %}
+
+    {% if t.score != None %}
+    <div class="alert alert-info mt-2">
+        📊 คะแนน: <b>{{ t.score }}</b><br>
+        💬 ครูว่า: {{ t.comment }}
+    </div>
+    {% endif %}
+
+{% endif %}
+</p>
+
+{% if t.view_status == "pending" or t.view_status == "late" %}
+<form action="{{ url_for('submit_work', task_id=t.id) }}"
+      method="POST"
+      enctype="multipart/form-data">
+
+    <input type="file" name="file" class="form-control mb-2">
+
+    {% if t.view_status == "late" %}
+    <div class="alert alert-warning">
+        ⚠️ งานนี้หมดเวลาส่งแล้ว การส่งงานจะถูกบันทึกเป็น <b>⏰ ส่งช้า</b>
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary btn-sm">
+        📤 ส่งงาน
+    </button>
+</form>
+{% else %}
+<button class="btn btn-secondary btn-sm" disabled>
+    ✅ ส่งงานแล้ว
+</button>
+{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<script>
+function formatTime(sec) {
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${h} ชม. ${m} นาที ${s} วินาที`;
+}
+
+document.querySelectorAll('.countdown').forEach(el => {
+    let seconds = parseInt(el.dataset.seconds);
+
+    function tick() {
+        if (seconds <= 0) {
+            el.innerHTML = "<span class='text-danger'>หมดเวลา (นักเรียนสามารถส่งช้าได้)</span>";
+            return;
+        }
+        el.textContent = formatTime(seconds);
+        seconds--;
+        setTimeout(tick, 1000);
+    }
+    tick();
+});
+</script>
+
+</body>
+</html>

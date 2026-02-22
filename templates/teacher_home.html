@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<!-- Navbar -->
+<nav class="navbar navbar-light bg-white shadow-sm px-4">
+    <span class="navbar-brand">
+        👨‍🏫 {{ session.username }} (ครู)
+    </span>
+    <a href="/logout" class="btn btn-outline-danger btn-sm">
+        🚪 Logout
+    </a>
+</nav>
+
+<div class="container mt-4">
+
+    <!-- ฟอร์มสั่งงาน -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            📢 สั่งงานนักเรียน
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('create_work')}}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label">วิชา</label>
+                    <input type="text" name="subject" class="form-control" placeholder="เช่น คณิตศาสตร์" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">ชื่องาน</label>
+                    <input type="text" name="title" class="form-control" placeholder="เช่น การบ้านบทที่ 5" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">กำหนดส่ง</label>
+                    <input type="datetime-local" name="deadline" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    ➕ เพิ่มงาน
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <a href="/export_excel" class="btn btn-success mb-3">
+        📊 Export Report (Excel)
+    </a>
+
+    <!-- รายการงานทั้งหมด -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            📋 งานที่สั่งทั้งหมด
+        </div>
+        <div class="card-body p-0">
+            {% if tasks %}
+            <table class="table table-striped mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>วิชา</th>
+                        <th>ชื่องาน</th>
+                        <th>กำหนดส่ง</th>
+                        <th>สถานะ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tasks %}
+                    <tr>
+                        <td>{{ t.subject }}</td>
+                        <td>
+                            <div><strong>{{ t.title }}</strong></div>
+                            <a href="{{ url_for('task_detail', task_id=t['id'])}}"
+                                 class="btn btn-sm btn-outline-primary mt-1">
+                                  👥 ดูผู้ส่ง ({{ t.submitted_by|default([])|length }})
+                                </a>
+                            </td>
+                        <td>{{ t.deadline }}</td>
+                        <td>
+                            {% if t.view_status == "pending" %}
+                                <span class="badge bg-warning text-dark">ยังไม่ส่ง</span>
+
+                            {% elif t.view_status == "late" %}
+                                <span class="badge bg-danger">หมดเวลา (ยังไม่ส่ง)</span>
+
+                            {% elif t.view_status == "submitted" %}
+                                <span class="badge bg-success">ส่งครบ</span>
+
+                            {% elif t.view_status == "submitted_late" %}
+                                <span class="badge bg-danger">ส่งครบ (มีส่งช้า)</span>
+
+                            {% elif t.view_status == "partial" %}
+                                👉 <span class="badge bg-info text-dark">ส่งบางส่วน</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="p-3 text-muted">
+                ยังไม่มีงานที่สั่ง
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
